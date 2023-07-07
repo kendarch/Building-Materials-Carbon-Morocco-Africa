@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Building Footprint Analysis : Moroccan Construction</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            color: #333333;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #dddddd;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: #ffffff;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .messages {
+            list-style-type: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+
+        .messages li {
+            color: #ff0000;
+        }
+
+        .chart {
+            width: 600px;
+            height: 400px;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Building Footprint Analysis : Moroccan Construction</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="/">
+        <table>
+            <tr>
+                <th>Material</th>
+                <th>Volume (m<sup>2</sup>)</th>
+                <th>Transportation Distance (km)</th>
+                <th>Transportation Method</th>
+            </tr>
+            {% for material, data in material_data.items() %}
+                <tr>
+                    <td>{{ material }}</td>
+                    <td><input type="number" name="{{ material }}_volume" value="{{ request.form.get(material + '_volume', 0) }}" step="1" min="0"></td>
+                    <td><input type="number" name="{{ material }}_distance" value="{{ request.form.get(material + '_distance', 0) }}" step="1" min="0"></td>
+                    <td>
+                        <select name="{{ material }}_method">
+                            <option value="fossil_fuel">Fossil Fuel Vehicles</option>
+                            <option value="electric">Electric Vehicles</option>
+                            <option value="flight">Flight</option>
+                            <option value="maritime">Maritime</option>
+                        </select>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        <input type="submit" value="Calculate">
+    </form>
+
+    {% if chart_data_footprint %}
+        <h2>Carbon Footprint Chart</h2>
+        <div id="chart_footprint" class="chart"></div>
+        <script>
+            var chartDataFootprint = {{ chart_data_footprint | safe }};
+            var materialDataFootprint = {{ material_data | safe }};
+
+            var traceFootprint = {
+                x: chartDataFootprint.materials,
+                y: chartDataFootprint.values,
+                name: 'Carbon Footprint',
+                type: 'bar',
+                marker: {
+                    color: chartDataFootprint.colors
+                }
+            };
+
+            var dataFootprint = [traceFootprint];
+
+            var layoutFootprint = {
+                title: 'Building Carbon Footprint',
+                xaxis: {
+                    title: 'Materials',
+                    tickangle: -45,
+                    automargin: true,
+                    ticktext: chartDataFootprint.materials,
+                    tickvals: chartDataFootprint.materials
+                },
+                yaxis: {
+                    title: 'Carbon Footprint (' + chartDataFootprint.unit + ')',
+                    side: 'left',
+                    showgrid: false,
+                    rangemode: 'tozero'
+                }
+            };
+
+            Plotly.newPlot('chart_footprint', dataFootprint, layoutFootprint);
+        </script>
+    {% endif %}
+
+    {% if chart_data_cost %}
+        <h2>Cost Chart</h2>
+        <div id="chart_cost" class="chart"></div>
+        <script>
+            var chartDataCost = {{ chart_data_cost | safe }};
+            var materialDataCost = {{ material_data | safe }};
+
+            var traceCost = {
+                x: chartDataCost.materials,
+                y: chartDataCost.values,
+                name: 'Cost',
+                type: 'bar',
+                marker: {
+                    color: chartDataCost.colors
+                }
+            };
+
+            var dataCost = [traceCost];
+
+            var layoutCost = {
+                title: 'Building Cost',
+                xaxis: {
+                    title: 'Materials',
+                    tickangle: -45,
+                    automargin: true,
+                    ticktext: chartDataCost.materials,
+                    tickvals: chartDataCost.materials
+                },
+                yaxis: {
+                    title: 'Cost (' + chartDataCost.unit + ')',
+                    side: 'left',
+                    showgrid: false,
+                    rangemode: 'tozero'
+                }
+            };
+
+            Plotly.newPlot('chart_cost', dataCost, layoutCost);
+        </script>
+    {% endif %}
+
+    {% if chart_data_distance %}
+        <h2>Distance Chart</h2>
+        <div id="chart_distance" class="chart"></div>
+        <script>
+            var chartDataDistance = {{ chart_data_distance | safe }};
+            var materialDataDistance = {{ material_data | safe }};
+
+            var traceDistance = {
+                x: chartDataDistance.materials,
+                y: chartDataDistance.values,
+                name: 'Distance',
+                type: 'bar',
+                marker: {
+                    color: 'purple'
+                }
+            };
+
+            var dataDistance = [traceDistance];
+
+            var layoutDistance = {
+                title: 'Transportation Distance',
+                xaxis: {
+                    title: 'Materials',
+                    tickangle: -45,
+                    automargin: true,
+                    ticktext: chartDataDistance.materials,
+                    tickvals: chartDataDistance.materials
+                },
+                yaxis: {
+                    title: 'Distance (' + chartDataDistance.unit + ')',
+                    side: 'left',
+                    showgrid: false,
+                    rangemode: 'tozero'
+                }
+            };
+
+            Plotly.newPlot('chart_distance', dataDistance, layoutDistance);
+        </script>
+    {% endif %}
+
+    {% if chart_data_pie %}
+        <h2>Material Carbon Footprint Distribution</h2>
+        <div id="chart_pie" class="chart"></div>
+        <script>
+            var chartDataPie = {{ chart_data_pie | safe }};
+            var materialDataPie = {{ material_data | safe }};
+
+            var tracePie = {
+                labels: chartDataPie.materials,
+                values: chartDataPie.values,
+                type: 'pie',
+                textinfo: 'label+percent',
+                textposition: 'inside',
+                automargin: true
+            };
+
+            var dataPie = [tracePie];
+
+            var layoutPie = {
+                title: 'Material Carbon Footprint Distribution',
+            };
+
+            Plotly.newPlot('chart_pie', dataPie, layoutPie);
+        </script>
+    {% endif %}
+    
+    {% if chart_data_ratio %}
+    <h2>Carbon Footprint to Cost Ratio Chart</h2>
+    <div id="chart_ratio" class="chart"></div>
+    <script>
+        var chartDataRatio = {{ chart_data_ratio | safe }};
+        var materialDataRatio = {{ material_data | safe }};
+
+        var traceRatio = {
+            x: chartDataRatio.materials,
+            y: chartDataRatio.values,
+            name: 'Carbon Footprint to Cost Ratio',
+            type: 'bar'
+        };
+
+        var dataRatio = [traceRatio];
+
+        var layoutRatio = {
+            title: 'Carbon Footprint to Cost Ratio',
+            xaxis: {
+                title: 'Materials',
+                tickangle: -45,
+                automargin: true,
+                ticktext: chartDataRatio.materials,
+                tickvals: chartDataRatio.materials
+            },
+            yaxis: {
+                title: 'Ratio (' + chartDataRatio.unit + ')',
+                side: 'left',
+                showgrid: false,
+                rangemode: 'tozero'
+            }
+        };
+
+        Plotly.newPlot('chart_ratio', dataRatio, layoutRatio);
+    </script>
+   {% endif %}
+   
+   {% if chart_data_cost_pie %}
+    <h2>Material Cost Distribution</h2>
+    <div id="chart_cost_pie" class="chart"></div>
+    <script>
+        var chartDataCostPie = {{ chart_data_cost_pie | safe }};
+        var materialDataCostPie = {{ material_data | safe }};
+
+        var traceCostPie = {
+            labels: chartDataCostPie.materials,
+            values: chartDataCostPie.values,
+            type: 'pie',
+            textinfo: 'label+percent',
+            textposition: 'inside',
+            automargin: true
+        };
+
+        var dataCostPie = [traceCostPie];
+
+        var layoutCostPie = {
+            title: 'Material Cost Distribution',
+        };
+
+        Plotly.newPlot('chart_cost_pie', dataCostPie, layoutCostPie);
+    </script>
+   {% endif %}
+
+{% if chart_data_distance_ratio %}
+    <h2>Carbon Footprint to Distance Ratio Chart</h2>
+    <div id="chart_distance_ratio" class="chart"></div>
+    <script>
+        var chartDataDistanceRatio = {{ chart_data_distance_ratio | safe }};
+        var materialDataDistanceRatio = {{ material_data | safe }};
+
+        var traceDistanceRatio = {
+            x: chartDataDistanceRatio.materials,
+            y: chartDataDistanceRatio.values,
+            name: 'Carbon Footprint to Distance Ratio',
+            type: 'bar',
+            marker: {
+                color: 'orange'
+            }
+        };
+
+        var dataDistanceRatio = [traceDistanceRatio];
+
+        var layoutDistanceRatio = {
+            title: 'Carbon Footprint to Distance Ratio',
+            xaxis: {
+                title: 'Materials',
+                tickangle: -45,
+                automargin: true,
+                ticktext: chartDataDistanceRatio.materials,
+                tickvals: chartDataDistanceRatio.materials
+            },
+            yaxis: {
+                title: 'Ratio (' + chartDataDistanceRatio.unit + ')',
+                side: 'left',
+                showgrid: false,
+                rangemode: 'tozero'
+            }
+        };
+
+        Plotly.newPlot('chart_distance_ratio', dataDistanceRatio, layoutDistanceRatio);
+    </script>
+   {% endif %}
+    
+</body>
+</html>

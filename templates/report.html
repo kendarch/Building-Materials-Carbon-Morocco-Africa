@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        p {
+            margin-bottom: 20px;
+        }
+
+        .chart {
+            width: 600px;
+            height: 400px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ title }}</h1>
+
+    <p>{{ paragraph }}</p>
+
+    {% if chart_data_footprint %}
+        <h2>Carbon Footprint Chart</h2>
+        <div class="chart">
+            <canvas id="chart_footprint"></canvas>
+        </div>
+        <script>
+            var chartDataFootprint = {{ chart_data_footprint | safe }};
+            var materialDataFootprint = {{ material_data | safe }};
+
+            // Chart creation code...
+        </script>
+    {% endif %}
+
+    {% if chart_data_cost %}
+        <h2>Cost Chart</h2>
+        <div class="chart">
+            <canvas id="chart_cost"></canvas>
+        </div>
+        <script>
+            var chartDataCost = {{ chart_data_cost | safe }};
+            var materialDataCost = {{ material_data | safe }};
+
+            // Chart creation code...
+        </script>
+    {% endif %}
+
+    {% if chart_data_distance %}
+        <h2>Distance Chart</h2>
+        <div class="chart">
+            <canvas id="chart_distance"></canvas>
+        </div>
+        <script>
+            var chartDataDistance = {{ chart_data_distance | safe }};
+            var materialDataDistance = {{ material_data | safe }};
+
+            // Chart creation code...
+        </script>
+    {% endif %}
+
+    {% if chart_data_pie %}
+        <h2>Material Carbon Footprint Distribution</h2>
+        <div class="chart">
+            <canvas id="chart_pie"></canvas>
+        </div>
+        <script>
+            var chartDataPie = {{ chart_data_pie | safe }};
+            var materialDataPie = {{ material_data | safe }};
+
+            // Chart creation code...
+        </script>
+    {% endif %}
+</body>
+</html>
